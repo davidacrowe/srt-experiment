@@ -8,192 +8,180 @@
   <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response@1.1.2"></script>
   <script src="https://unpkg.com/@jspsych/plugin-preload@1.1.2"></script>
   <link href="https://unpkg.com/jspsych@7.3.1/css/jspsych.css" rel="stylesheet">
+  <style>
+    .download-btn {
+      padding: 15px 25px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 18px;
+      margin: 20px;
+      cursor: pointer;
+    }
+    .download-container {
+      text-align: center;
+      margin: 30px 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
   <div id="jspsych-target"></div>
   
   <script>
-    // Your experiment code will go here
     // Initialize jsPsych
-
-//function saveDataToSheets(data) {
-//  const xhr = new XMLHttpRequest();
-//  // Replace with your actual web app URL from Step 2
-//  xhr.open('POST', 'https://script.google.com/a/macros/augsburg.edu/s/AKfycbybJTx38q-pDzz2aJOJinCTgXtIkeMv8IG1iycMtN1iDbdWGup4LGdoESUEkHQ9h0qM/exec');
-//  xhr.setRequestHeader('Content-Type', 'application/json');
-//  xhr.onload = function() {
-//    if (xhr.status === 200) {
-//      console.log('Data saved successfully');
-//    } else {
-//      console.error('Error saving data');
-//    }
-//  };
-//  xhr.send(JSON.stringify({data: data}));
-//}
-
-// Initialize jsPsych with the save function
-//const jsPsych = initJsPsych({
-//  on_finish: function() {
-//    // Get all data as CSV and save it
-//    saveDataToSheets(jsPsych.data.get().csv());
-//    // Also display data on screen for backup
-//    jsPsych.data.displayData('csv');
-//  }
-//});
-
-
-// Initialize jsPsych for saving data to .csv
-const jsPsych = initJsPsych({
-  on_finish: function() {
-    // Get all data as CSV
-    const csvData = jsPsych.data.get().csv();
-    
-    // Create a container for buttons
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style.textAlign = 'center';
-    buttonContainer.style.margin = '20px 0';
-    document.body.insertBefore(buttonContainer, document.body.firstChild);
-    
-    // Create download button
-    const downloadBtn = document.createElement('button');
-    downloadBtn.innerHTML = 'Download Data as CSV File';
-    downloadBtn.style.padding = '12px 20px';
-    downloadBtn.style.backgroundColor = '#4CAF50';
-    downloadBtn.style.color = 'white';
-    downloadBtn.style.border = 'none';
-    downloadBtn.style.borderRadius = '4px';
-    downloadBtn.style.fontSize = '16px';
-    downloadBtn.style.margin = '10px';
-    downloadBtn.style.cursor = 'pointer';
-    
-    downloadBtn.addEventListener('click', function() {
-      const participantId = prompt("Please enter your name or ID:", "");
-      if (participantId) {
-        const filename = 'srt_data_' + participantId + '_' + 
-                         new Date().toISOString().replace(/[:.]/g, '-') + '.csv';
+    const jsPsych = initJsPsych({
+      on_finish: function() {
+        // Get all data as CSV
+        const csvData = jsPsych.data.get().csv();
         
-        const downloadLink = document.createElement('a');
-        downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
-        downloadLink.download = filename;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        // Create a download container
+        const downloadContainer = document.createElement('div');
+        downloadContainer.className = 'download-container';
+        document.body.insertBefore(downloadContainer, document.getElementById('jspsych-content'));
+        
+        // Add instruction text
+        const instructions = document.createElement('h2');
+        instructions.textContent = 'Your experiment is complete!';
+        downloadContainer.appendChild(instructions);
+        
+        const subInstructions = document.createElement('p');
+        subInstructions.innerHTML = '<strong>Please download your data file and submit it to your instructor.</strong>';
+        downloadContainer.appendChild(subInstructions);
+        
+        // Create download button
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'Download Data File';
+        downloadBtn.className = 'download-btn';
+        downloadBtn.onclick = function() {
+          const participantId = prompt("Please enter your name or ID:", "");
+          if (participantId) {
+            const filename = 'srt_data_' + participantId + '.csv';
+            
+            // Create and trigger download
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }
+        };
+        downloadContainer.appendChild(downloadBtn);
+        
+        // Also display data in jspsych's default format
+        jsPsych.data.displayData();
       }
     });
-    
-    // Add instructions and button
-    const instructions = document.createElement('p');
-    instructions.innerHTML = '<strong>Please download your data and submit it to your instructor.</strong>';
-    buttonContainer.appendChild(instructions);
-    buttonContainer.appendChild(downloadBtn);
-    
-    // Still display data on screen
-    jsPsych.data.displayData('csv');
-  }
-});
 
-// Define the grid for the SRT task
-const grid = [
-  [1, 1, 1, 1],
-  [1, 1, 1, 1],
-  [1, 1, 1, 1],
-  [1, 1, 1, 1]
-];
+    // Define the grid for the SRT task
+    const grid = [
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1]
+    ];
 
-// Define sequence patterns (alternating between pattern and random)
-const pattern_sequence = [0, 1, 3, 2, 2, 3, 1, 0, 0, 2, 1, 3]; // Hidden pattern
-const random_positions = [];
-for (let i = 0; i < 12; i++) {
-  random_positions.push(Math.floor(Math.random() * 4));
-}
+    // Define sequence patterns (alternating between pattern and random)
+    const pattern_sequence = [0, 1, 3, 2, 2, 3, 1, 0, 0, 2, 1, 3]; // Hidden pattern
+    const random_positions = [];
+    for (let i = 0; i < 12; i++) {
+      random_positions.push(Math.floor(Math.random() * 4));
+    }
 
-// Create timeline
-const timeline = [];
+    // Create timeline
+    const timeline = [];
 
-// Instructions
-const instructions = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: `
-    <h1>Serial Reaction Time Task</h1>
-    <p>In this task, you will see a grid of squares.</p>
-    <p>One square will be highlighted in a different color.</p>
-    <p>Press the corresponding key to respond:</p>
-    <p>Row 1: Q W E R</p>
-    <p>Row 2: A S D F</p>
-    <p>Row 3: Z X C V</p>
-    <p>Row 4: U I O P</p>
-    <p>Try to respond as quickly and accurately as possible.</p>
-    <p>Press any key to begin.</p>
-  `,
-  post_trial_gap: 1000
-};
-timeline.push(instructions);
+    // Instructions
+    const instructions = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <h1>Serial Reaction Time Task</h1>
+        <p>In this task, you will see a grid of squares.</p>
+        <p>One square will be highlighted in a different color.</p>
+        <p>Press the corresponding key to respond:</p>
+        <p>Row 1: Q W E R</p>
+        <p>Row 2: A S D F</p>
+        <p>Row 3: Z X C V</p>
+        <p>Row 4: U I O P</p>
+        <p>Try to respond as quickly and accurately as possible.</p>
+        <p>Press any key to begin.</p>
+      `,
+      post_trial_gap: 1000
+    };
+    timeline.push(instructions);
 
-// Define key mapping for 4x4 grid
-const key_mapping = [
-  ['q', 'w', 'e', 'r'],
-  ['a', 's', 'd', 'f'],
-  ['z', 'x', 'c', 'v'],
-  ['u', 'i', 'o', 'p']
-];
+    // Define key mapping for 4x4 grid
+    const key_mapping = [
+      ['q', 'w', 'e', 'r'],
+      ['a', 's', 'd', 'f'],
+      ['z', 'x', 'c', 'v'],
+      ['u', 'i', 'o', 'p']
+    ];
 
-// Create blocks - first with pattern, then random
-const pattern_block = {
-  type: jsPsychSerialReactionTime,
-  grid: grid,
-  target: function() {
-    // Get the next target position
-    const pos = jsPsych.timelineVariable('position');
-    const target_idx = pos % 4; // Convert to grid position
-    const target_row = Math.floor(target_idx / 2);
-    const target_col = target_idx % 2 + (target_row % 2) * 2; // Create 2D movement pattern
-    return [target_row, target_col];
-  },
-  choices: key_mapping,
-  target_color: '#006738',
-  response_ends_trial: true,
-  pre_target_duration: 500,
-  data: {
-    block_type: 'pattern',
-    position: jsPsych.timelineVariable('position')
-  }
-};
+    // Create blocks - first with pattern, then random
+    const pattern_block = {
+      type: jsPsychSerialReactionTime,
+      grid: grid,
+      target: function() {
+        // Get the next target position
+        const pos = jsPsych.timelineVariable('position');
+        const target_idx = pos % 4; // Convert to grid position
+        const target_row = Math.floor(target_idx / 2);
+        const target_col = target_idx % 2 + (target_row % 2) * 2; // Create 2D movement pattern
+        return [target_row, target_col];
+      },
+      choices: key_mapping,
+      target_color: '#006738',
+      response_ends_trial: true,
+      pre_target_duration: 500,
+      data: {
+        block_type: 'pattern',
+        position: jsPsych.timelineVariable('position')
+      }
+    };
 
-// Create pattern block with multiple trials
-const pattern_procedure = {
-  timeline: [pattern_block],
-  timeline_variables: pattern_sequence.map(p => ({position: p})),
-  randomize_order: false,
-  repetitions: 5 // 5 repetitions of the pattern sequence
-};
-timeline.push(pattern_procedure);
+    // Create pattern block with multiple trials
+    const pattern_procedure = {
+      timeline: [pattern_block],
+      timeline_variables: pattern_sequence.map(p => ({position: p})),
+      randomize_order: false,
+      repetitions: 5 // 5 repetitions of the pattern sequence
+    };
+    timeline.push(pattern_procedure);
 
-// Create random block
-const random_procedure = {
-  timeline: [pattern_block],
-  timeline_variables: random_positions.map(p => ({position: p})),
-  randomize_order: true,
-  repetitions: 5,
-  data: {
-    block_type: 'random'
-  }
-};
-timeline.push(random_procedure);
+    // Create random block
+    const random_procedure = {
+      timeline: [pattern_block],
+      timeline_variables: random_positions.map(p => ({position: p})),
+      randomize_order: true,
+      repetitions: 5,
+      data: {
+        block_type: 'random'
+      }
+    };
+    timeline.push(random_procedure);
 
-// Final screen
-const final_screen = {
-  type: jsPsychHtmlKeyboardResponse,
-  stimulus: `
-    <h2>The experiment is complete!</h2>
-    <p>Your data will be displayed on the next screen.</p>
-    <p>Please save or copy this data and submit it as directed by your instructor.</p>
-    <p>Press any key to view your data.</p>
-  `
-};
-timeline.push(final_screen);
+    // Final screen
+    const final_screen = {
+      type: jsPsychHtmlKeyboardResponse,
+      stimulus: `
+        <h2>The experiment is complete!</h2>
+        <p>Your data will be displayed on the next screen.</p>
+        <p>Please download your data file and submit it as directed by your instructor.</p>
+        <p>Press any key to continue to the data screen.</p>
+      `
+    };
+    timeline.push(final_screen);
 
-// Run the experiment
-jsPsych.run(timeline);
+    // Run the experiment
+    jsPsych.run(timeline);
   </script>
 </body>
 </html>
