@@ -19,7 +19,7 @@
 // Add this before running the experiment
 const saveDataToSheets = function(data){
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', 'YOUR_GOOGLE_SCRIPT_URL');
+  xhr.open('POST', 'https://docs.google.com/spreadsheets/d/164RdPLzZrESB_HOTFr1Z5mTlBfQ88nMBqyjVHnH9RQA/edit?usp=sharing');
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.send(JSON.stringify({data: data}));
 };
