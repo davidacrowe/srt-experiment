@@ -41,7 +41,7 @@
         // Create a download container
         const downloadContainer = document.createElement('div');
         downloadContainer.className = 'download-container';
-        document.body.insertBefore(downloadContainer, document.getElementById('jspsych-content'));
+        document.body.appendChild(downloadContainer);
         
         // Add instruction text
         const instructions = document.createElement('h2');
