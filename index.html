@@ -16,27 +16,78 @@
     // Your experiment code will go here
     // Initialize jsPsych
 
-function saveDataToSheets(data) {
-  const xhr = new XMLHttpRequest();
-  // Replace with your actual web app URL from Step 2
-  xhr.open('POST', 'https://script.google.com/a/macros/augsburg.edu/s/AKfycbybJTx38q-pDzz2aJOJinCTgXtIkeMv8IG1iycMtN1iDbdWGup4LGdoESUEkHQ9h0qM/exec');
-  xhr.setRequestHeader('Content-Type', 'application/json');
-  xhr.onload = function() {
-    if (xhr.status === 200) {
-      console.log('Data saved successfully');
-    } else {
-      console.error('Error saving data');
-    }
-  };
-  xhr.send(JSON.stringify({data: data}));
-}
+//function saveDataToSheets(data) {
+//  const xhr = new XMLHttpRequest();
+//  // Replace with your actual web app URL from Step 2
+//  xhr.open('POST', 'https://script.google.com/a/macros/augsburg.edu/s/AKfycbybJTx38q-pDzz2aJOJinCTgXtIkeMv8IG1iycMtN1iDbdWGup4LGdoESUEkHQ9h0qM/exec');
+//  xhr.setRequestHeader('Content-Type', 'application/json');
+//  xhr.onload = function() {
+//    if (xhr.status === 200) {
+//      console.log('Data saved successfully');
+//    } else {
+//      console.error('Error saving data');
+//    }
+//  };
+//  xhr.send(JSON.stringify({data: data}));
+//}
 
 // Initialize jsPsych with the save function
+//const jsPsych = initJsPsych({
+//  on_finish: function() {
+//    // Get all data as CSV and save it
+//    saveDataToSheets(jsPsych.data.get().csv());
+//    // Also display data on screen for backup
+//    jsPsych.data.displayData('csv');
+//  }
+//});
+
+
+// Initialize jsPsych for saving data to .csv
 const jsPsych = initJsPsych({
   on_finish: function() {
-    // Get all data as CSV and save it
-    saveDataToSheets(jsPsych.data.get().csv());
-    // Also display data on screen for backup
+    // Get all data as CSV
+    const csvData = jsPsych.data.get().csv();
+    
+    // Create a container for buttons
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.textAlign = 'center';
+    buttonContainer.style.margin = '20px 0';
+    document.body.insertBefore(buttonContainer, document.body.firstChild);
+    
+    // Create download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.innerHTML = 'Download Data as CSV File';
+    downloadBtn.style.padding = '12px 20px';
+    downloadBtn.style.backgroundColor = '#4CAF50';
+    downloadBtn.style.color = 'white';
+    downloadBtn.style.border = 'none';
+    downloadBtn.style.borderRadius = '4px';
+    downloadBtn.style.fontSize = '16px';
+    downloadBtn.style.margin = '10px';
+    downloadBtn.style.cursor = 'pointer';
+    
+    downloadBtn.addEventListener('click', function() {
+      const participantId = prompt("Please enter your name or ID:", "");
+      if (participantId) {
+        const filename = 'srt_data_' + participantId + '_' + 
+                         new Date().toISOString().replace(/[:.]/g, '-') + '.csv';
+        
+        const downloadLink = document.createElement('a');
+        downloadLink.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData);
+        downloadLink.download = filename;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+      }
+    });
+    
+    // Add instructions and button
+    const instructions = document.createElement('p');
+    instructions.innerHTML = '<strong>Please download your data and submit it to your instructor.</strong>';
+    buttonContainer.appendChild(instructions);
+    buttonContainer.appendChild(downloadBtn);
+    
+    // Still display data on screen
     jsPsych.data.displayData('csv');
   }
 });
