@@ -16,24 +16,27 @@
     // Your experiment code will go here
     // Initialize jsPsych
 
-// Add this before running the experiment
-const saveDataToSheets = function(data){
+function saveDataToSheets(data) {
   const xhr = new XMLHttpRequest();
+  // Replace with your actual web app URL from Step 2
   xhr.open('POST', 'https://script.google.com/a/macros/augsburg.edu/s/AKfycbybJTx38q-pDzz2aJOJinCTgXtIkeMv8IG1iycMtN1iDbdWGup4LGdoESUEkHQ9h0qM/exec');
   xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.onload = function() {
+    if (xhr.status === 200) {
+      console.log('Data saved successfully');
+    } else {
+      console.error('Error saving data');
+    }
+  };
   xhr.send(JSON.stringify({data: data}));
-};
-
-// Modify the on_finish function
-on_finish: function() {
-  saveDataToSheets(jsPsych.data.get().csv());
-  jsPsych.data.displayData('csv');
 }
 
-
+// Initialize jsPsych with the save function
 const jsPsych = initJsPsych({
   on_finish: function() {
-    // Display data at the end for students to copy or download
+    // Get all data as CSV and save it
+    saveDataToSheets(jsPsych.data.get().csv());
+    // Also display data on screen for backup
     jsPsych.data.displayData('csv');
   }
 });
